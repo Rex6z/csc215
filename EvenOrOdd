@@ -1,0 +1,31 @@
+load a/b
+AND A,01
+if not 0
+    incriment a by -1
+    incriment b by -2
+    if b is 0
+        end
+    jump
+if odd
+    add original
+    end
+
+
+LDA 47
+MOV B,A
+MOV A,C
+LDA 46
+ANA B
+STA 46
+JNZ
+ADD B,A
+STA
+HLT
+DCR A
+DCR B
+DCR B
+JNZ
+HLT
+
+46:01
+47:x
