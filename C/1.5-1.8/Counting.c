@@ -6,5 +6,5 @@ main()
     nc = 0;
     while (getchar() != EOF)
         ++nc;
-    printf("")
+    printf("%ld/n", nc)
 }
