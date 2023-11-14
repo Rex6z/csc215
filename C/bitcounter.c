@@ -1,47 +1,62 @@
 /*
-x &= (x-1)  removes the last bit because if you have a number such as 1101 (13) it will set x to the result of a bitwise and with 1100 (12) giving the result 1100 (12)
-If we do this again, we set x to 1100 (12) & 1011 (11) which gives 1000
-As you can see, this removes the last bit with the value of '1'
+Author: Cyrus Haywood
+
+Date: 14 November 2023
+
+Description:
+    This program is a solution to Exercise 2-9 from The C Programming Language,
+    2nd Edition, by Brian kernighan and Dennis Ritchie.
+
+    The task is to write function bitcount(x) that returns the number of 1-bits
+    in its integer argument using the function x &= (x-1).
+
+Example:
+    The unsigned integer 90 will be stored in binary as 01011010. Calling bitcount(13)
+    should return 4. It does this by counting the number of times a bitwise AND
+    between a number and one less than itself is needed to reach 0. The first iteration
+    will compare 01011010 and 01011001, giving the result 01011000. This counts the
+    number of 1-bits because the bitwise AND will remove the right most 1-bit.
 */
 
-// Use the normal library
 #include <stdio.h>
+#include "bit_tools.h"
 
-// Main part of the program
-void main(){
-    // declare input varible
-    unsigned input;
-    
-    // loop for easier demonstration
-    while(1==1){
-        // user input for easier demonstration
-        scanf("%d", &input);
-        
-        // print output with easier to read format
-        printf("The bitcount for %d is %d\n\n", input, bitcount(input));
-    }
-}
-
-// bitcount function with unsigned input
-int bitcount(unsigned x){
-    // declare counter variable
+int bitcount(unsigned x) {
     int b;
+
+    printf("Binary: ");
+    print_binary_byte(x);
+    printf("\n");
     
-    // count each 1 in the input (binary)
-    for (b = 0; x != 0; x &= (x-1))
+    for (b = 0; x != 0; x &= (x-1)) {
         b++;
+        
+        printf("Value: ");
+        print_binary_byte(x);
+        printf(" \tBitwise AND with: ");
+        print_binary_byte(x-1);
+        printf("\tResult: ");
+        print_binary_byte(x & (x-1));
+        printf("\tCounter: %d\n", b);
+    }
+
+    printf("Value: ");
+    print_binary_byte(x);
+    printf(" \tFinal count: %d\n", b);
     
-    // return the total
     return b;
 }
 
-//original version
-/*
-int bitcount(unsigned x){
-    int b;
-    for (b = 0; x != 0; x >>= 1)
-        if (x & 01)
-            b++;
-    return b;
+void main() {
+    unsigned input = 91;
+    printf("Input: %d\n", input);
+    printf("The bitcount for %d is %d\n\n", input, bitcount(input));
+
+    input = 130;
+    printf("Input: %d\n", input);
+    printf("The bitcount for %d is %d\n\n", input, bitcount(input));
+
+    input = 255;
+    printf("Input: %d\n", input);
+    printf("The bitcount for %d is %d\n\n", input, bitcount(input));
 }
-*/
