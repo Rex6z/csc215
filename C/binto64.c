@@ -1,94 +1,105 @@
-#include <stdint.h>
+/*
+    Description: Convert the text in the file passed as input to base64.
+*/
+#include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 
+char base64Alphabet[64] = {
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', /*  0 -  7 */
+    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', /*  8 - 15 */
+    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', /* 16 - 23 */
+    'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', /* 24 - 31 */
+    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', /* 32 - 39 */
+    'o', 'p', 'q', 'r', 's', 't', 'u', 'v', /* 40 - 47 */
+    'w', 'x', 'y', 'z', '0', '1', '2', '3', /* 48 - 55 */
+    '4', '5', '6', '7', '8', '9', '+', '/'  /* 56 - 63 */
+};
 
-static char encoding_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-                                'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-                                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-                                'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-                                'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-                                'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-                                'w', 'x', 'y', 'z', '0', '1', '2', '3',
-                                '4', '5', '6', '7', '8', '9', '+', '/'};
-static char *decoding_table = NULL;
-static int mod_table[] = {0, 2, 1};
+char getbits(char x, int p, int n);
 
+int main(int argc, char *argv[]) {
+    FILE *file;
+    char *buffer;
+    long file_size;
 
-char *base64_encode(const unsigned char *data,
-                    size_t input_length,
-                    size_t *output_length) {
-
-    *output_length = 4 * ((input_length + 2) / 3);
-
-    char *encoded_data = malloc(*output_length);
-    if (encoded_data == NULL) return NULL;
-
-    for (int i = 0, j = 0; i < input_length;) {
-
-        uint32_t octet_a = i < input_length ? (unsigned char)data[i++] : 0;
-        uint32_t octet_b = i < input_length ? (unsigned char)data[i++] : 0;
-        uint32_t octet_c = i < input_length ? (unsigned char)data[i++] : 0;
-
-        uint32_t triple = (octet_a << 0x10) + (octet_b << 0x08) + octet_c;
-
-        encoded_data[j++] = encoding_table[(triple >> 3 * 6) & 0x3F];
-        encoded_data[j++] = encoding_table[(triple >> 2 * 6) & 0x3F];
-        encoded_data[j++] = encoding_table[(triple >> 1 * 6) & 0x3F];
-        encoded_data[j++] = encoding_table[(triple >> 0 * 6) & 0x3F];
+    if (argc != 2) {
+        printf("Usage: %s <filename>\n", argv[0]);
+        return 1;
     }
 
-    for (int i = 0; i < mod_table[input_length % 3]; i++)
-        encoded_data[*output_length - 1 - i] = '=';
+    // Open the binary file in binary read mode
+    file = fopen(argv[1], "rb");
 
-    return encoded_data;
-}
-
-
-unsigned char *base64_decode(const char *data,
-                             size_t input_length,
-                             size_t *output_length) {
-
-    if (decoding_table == NULL) build_decoding_table();
-
-    if (input_length % 4 != 0) return NULL;
-
-    *output_length = input_length / 4 * 3;
-    if (data[input_length - 1] == '=') (*output_length)--;
-    if (data[input_length - 2] == '=') (*output_length)--;
-
-    unsigned char *decoded_data = malloc(*output_length);
-    if (decoded_data == NULL) return NULL;
-
-    for (int i = 0, j = 0; i < input_length;) {
-
-        uint32_t sextet_a = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
-        uint32_t sextet_b = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
-        uint32_t sextet_c = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
-        uint32_t sextet_d = data[i] == '=' ? 0 & i++ : decoding_table[data[i++]];
-
-        uint32_t triple = (sextet_a << 3 * 6)
-        + (sextet_b << 2 * 6)
-        + (sextet_c << 1 * 6)
-        + (sextet_d << 0 * 6);
-
-        if (j < *output_length) decoded_data[j++] = (triple >> 2 * 8) & 0xFF;
-        if (j < *output_length) decoded_data[j++] = (triple >> 1 * 8) & 0xFF;
-        if (j < *output_length) decoded_data[j++] = (triple >> 0 * 8) & 0xFF;
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
     }
 
-    return decoded_data;
+    // Find the size of the file
+    fseek(file, 0, SEEK_END);
+    file_size = ftell(file);
+    rewind(file);
+
+    // Allocate memory for the buffer to hold the file contents
+    int bytesOver = file_size % 3;
+    buffer = (char *)malloc(file_size + (3 - bytesOver));
+    if (buffer == NULL) {
+        perror("Memory allocation error");
+        fclose(file);
+        return 1;
+    }
+
+    // Read the file contents into the buffer
+    if (fread(buffer, 1, file_size, file) != file_size) {
+        perror("Error reading file");
+        free(buffer);
+        fclose(file);
+        return 1;
+    }
+
+    // Close the file
+    fclose(file);
+
+    // ***** convert to base64 & print *****
+    int iters = ceil(file_size / 3.0);
+    for (long i = 0; i < iters; ++i) {
+        bool isLast = i == iters - 1;
+        
+        int bufIndex = i * 3;
+        char currentChar = (char)buffer[bufIndex];
+        char first = getbits(buffer[bufIndex], 8, 6);
+        char second = (getbits(buffer[bufIndex], 2, 2) << 4) | getbits(buffer[bufIndex + 1], 8, 4);
+        char third = (getbits(buffer[bufIndex + 1], 4, 4) << 2) | getbits(buffer[bufIndex + 2], 8, 2);
+        char fourth = getbits(buffer[bufIndex + 2], 6, 6);
+
+        printf("%c", base64Alphabet[first]);
+        printf("%c", base64Alphabet[second]);
+        if(isLast && bytesOver == 1) { // quantize
+            printf("==");
+            break; // end the loop, we've processed everything
+        } else {
+            printf("%c", base64Alphabet[third]);
+        }
+        if(isLast && bytesOver == 2) { // quantize
+            printf("=");
+        } else {
+            printf("%c", base64Alphabet[fourth]);
+        }
+    }
+
+    printf("\n");
+
+    // Free the allocated memory
+    free(buffer);
+
+    return 0;
 }
 
-
-void build_decoding_table() {
-
-    decoding_table = malloc(256);
-
-    for (int i = 0; i < 64; i++)
-        decoding_table[(unsigned char) encoding_table[i]] = i;
-}
-
-
-void base64_cleanup() {
-    free(decoding_table);
+char getbits(char x, int p, int n)
+{
+    return (x >> (p - n)) & ~(~0 << n);
 }
