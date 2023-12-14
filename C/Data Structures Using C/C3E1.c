@@ -27,7 +27,7 @@ void main(){
     // Make the scores list random
     for (int x = 0; x < 20; x++) {
         for (int y = 0; y < 5; y++) {
-            MARKS[x][y] = rand()%100;
+            MARKS[x][y] = rand()%100+1;
         }
     }
     
