@@ -1,0 +1,7 @@
+1: A string is an array of characters that is defined as text and operations such as concatenate, compair, and substring extraction can be done on them.
+2: A string is represented as an array with each character being stored at a memory location but an extra piece of memory is used for "\0" to mark the end.
+3: A string can be read from the standard input through functions such as gets() and fgets().
+4: A string can be displayed with the printf() command, which formats and prints the conditions as a string.
+5: The function printf(var) will print whatever string is inputed into the condition. The function scanf(type, var_name) will take the input defined as the type (formated like "%s" for string) then save it to the variable defined as &var_name.
+13: The function scanf() lets you designate exactly what you want to read (ie: the variable type or the number of characters) but will terminate when it hits a blank space. The function gets() will read from the starting point and keep going until it hits a NULL value.
+18: A character array is any array of characters while a string is specificaly one that uses a NULL value to indicate the end of the array.
