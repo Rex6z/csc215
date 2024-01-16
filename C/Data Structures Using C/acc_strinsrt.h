@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 // Get string length
@@ -160,4 +161,70 @@ char* acc_strrplc(const char *str, const char *pat, const char *rep_pat){
 
     new_str[n] = '\0';
     return new_str;
+}
+
+// Sort n number of strings
+char (*acc_shortstrs(char names[][10], int n))[10] {
+    char temp[10];
+    int i, j;
+
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n - 1; j++) {
+            if (strcmp(names[j], names[j + 1]) > 0) {
+                strcpy(temp, names[j]);
+                strcpy(names[j], names[j + 1]);
+                strcpy(names[j + 1], temp);
+            }
+        }
+    }
+
+    char (*sorted_names)[10] = (char (*)[10])malloc(n * sizeof(names[0]));
+
+    if (sorted_names == NULL) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (i = 0; i < n; i++) {
+        strcpy(sorted_names[i], names[i]);
+    }
+
+    return sorted_names;
+}
+
+void acc_count(const char *text, int *word_count, int *line_count, int *char_count) {
+    printf("\n This is stuff %s", text);
+
+    for (int i = 0; text[i] != '\0'; i++) {
+        (*char_count)++;
+
+        if (text[i] == '\n' || i == 79)
+            (*line_count)++;
+
+        if (text[i] == ' ' && text[i + 1] != ' ')
+            (*word_count)++;
+    }
+}
+
+int is_palindrome(const char *str) {
+    int i = 0, j, length = 0;
+
+    while (str[i] != '\0' && str[i] != '\n') {
+        length++;
+        i++;
+    }
+
+    i = 0;
+    j = length - 1;
+
+    while (i < length / 2) {
+        if (str[i] == str[j]) {
+            i++;
+            j--;
+        } else {
+            return 0;
+        }
+    }
+
+    return 1;
 }

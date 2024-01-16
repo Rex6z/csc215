@@ -8,7 +8,7 @@ void main(){
     char str1[100]="Hello";
     char str2[100]="el";
     char str3[100]="ap";
+    char array[3][3]={"abc","ghi","def"};
 
-
-    printf("%s", acc_strrplc(str1, str2, str3));
+    printf("%s", acc_shortstrs(*array, 3));
 }
